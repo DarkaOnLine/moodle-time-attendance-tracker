@@ -1,0 +1,29 @@
+<?php $helper = new attendance_tracker_helpers(); ?>
+<table class="table">
+    <thead>
+    <tr>
+        <th><?php echo get_string('course', 'block_attendance_tracker') ?></th>
+        <th><?php echo get_string('lesson', 'block_attendance_tracker') ?></th>
+        <th><?php echo get_string('quiz', 'block_attendance_tracker') ?></th>
+        <th><?php echo get_string('date', 'block_attendance_tracker') ?></th>
+        <th><?php echo get_string('time_spend', 'block_attendance_tracker') ?></th>
+    </tr>
+    </thead>
+    <tbody>
+        <?php $total_time = 0; if(!empty($records)) foreach($records as $r){ ?>
+        <tr>
+            <th><?php echo $r->course ?></th>
+            <td><?php echo $r->lesson ?></td>
+            <td><?php echo $r->quiz ?></td>
+            <td><?php echo date('Y-m-d',strtotime($r->date)) ?></td>
+            <td><?php echo $helper->seconds_to_string($r->time_in_seconds); $total_time += $r->time_in_seconds;?></td>
+        </tr>
+        <?php } ?>
+    </tbody>
+    <tfoot>
+    <tr>
+        <th colspan="4"><?php echo get_string('total_time', 'block_attendance_tracker') ?>:</th>
+        <th><?php echo $helper->seconds_to_string($total_time);?></th>
+    </tr>
+    </tfoot>
+</table>
