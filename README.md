@@ -1,3 +1,10 @@
+## About ##
+
+This is a very simple and straightforward plugin to track students attendance time in Lesson and Quiz activities and make simple report about students time spend.
+
+Plugin logs time only then browser and browsers tab is active. If the tab is not active, timer stops and will resumes only then student comes back to the course tab.
+
+
 ## Instalation ##
 
 ### First way ###
