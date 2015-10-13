@@ -25,68 +25,90 @@
 defined('MOODLE_INTERNAL') || die;
 
 if (!defined('REPORT_LOG_MAX_DISPLAY')) {
-    define('REPORT_LOG_MAX_DISPLAY', 150); // days
+    define('REPORT_LOG_MAX_DISPLAY', 150); // Days.
 }
 
 require_once('helpers.php');
 
-function block_attendance_tracker_print_log($course_id, $user_id, $date_from, $date_to){
+/**
+ * Show log
+ *
+ * @param $courseid
+ * @param $userid
+ * @param $datefrom
+ * @param $dateto
+ */
+function block_attendance_tracker_print_log($courseid, $userid, $datefrom, $dateto) {
 
     global $DB;
 
     $sql = "
-        SELECT t.*, c.fullname AS course, l.name AS lesson, q.name AS quiz
-        FROM {block_attendance_tracker} AS t
-        LEFT JOIN {course} AS c ON c.id = t.course_id
-        LEFT JOIN {lesson} AS l ON l.id = t.lesson_id
-        LEFT JOIN {quiz} AS q ON q.id = t.quiz_id
+        SELECT
+          {block_attendance_tracker}.*,
+          {course}.fullname AS course,
+          {lesson}.name AS lesson,
+          {quiz}.name AS quiz
+        FROM {block_attendance_tracker}
+        LEFT JOIN {course} ON {course}.id = {block_attendance_tracker}.course_id
+        LEFT JOIN {lesson} ON {lesson}.id = {block_attendance_tracker}.lesson_id
+        LEFT JOIN {quiz} ON {quiz}.id = {block_attendance_tracker}.quiz_id
         WHERE course_id = :course_id AND
         user_id = :user_id AND
         date >= :date_from AND
         date <= :date_to
-        ORDER BY c.fullname, t.date
+        ORDER BY {course}.fullname, {block_attendance_tracker}.date
     ";
 
-    $records = $DB->get_records_sql($sql,array(
-        'course_id' => $course_id,
-        'user_id' => $user_id,
-        'date_from' => date('Y-m-d 00:00:00',$date_from),
-        'date_to' => date('Y-m-d 23:59:59',$date_to),
+    $records = $DB->get_records_sql($sql, array(
+        'course_id' => $courseid,
+        'user_id' => $userid,
+        'date_from' => date('Y-m-d 00:00:00', $datefrom),
+        'date_to' => date('Y-m-d 23:59:59', $dateto),
     ));
 
-    include dirname(__FILE__).'/../tpl/report.phtml';
+    include(dirname(__FILE__).'/../tpl/report.phtml');
 }
 
+/**
+ * Get log for view
+ *
+ * @param int $courseid
+ * @param int $selecteduser
+ * @param null $datefrom
+ * @param null $dateto
+ * @param string $logformat
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function block_attendance_tracker_report_log_print_selector_form(
+    $courseid = 0, $selecteduser = 0, $datefrom = null, $dateto = null) {
 
-function block_attendance_tracker_report_log_print_selector_form($course_id = 0, $selecteduser = 0, $datefrom = null, $dateto = null, $logformat='showashtml') {
-
-    global $USER, $CFG, $DB, $OUTPUT, $SESSION;
+    global $CFG, $DB;
 
     $helper = new attendance_tracker_helpers();
 
     $context = $sitecontext = context_system::instance();
 
-    // Get all the possible users
+    // Get all the possible users.
     $users = array();
 
-    // Define limitfrom and limitnum for queries below
-    // If $showusers is enabled... don't apply limitfrom and limitnum
+    // Define limitfrom and limitnum for queries below.
+    // If $showusers is enabled... don't apply limitfrom and limitnum.
     $limitfrom = empty($showusers) ? 0 : '';
     $limitnum  = empty($showusers) ? COURSE_MAX_USERS_PER_DROPDOWN + 1 : '';
 
-
-    // this may be a lot of users :-(
-    $courseusers = $DB->get_records('user', array('deleted'=>0), 'lastaccess DESC', 'id, ' . get_all_user_name_fields(true),
-        $limitfrom, $limitnum);
-
+    // This may be a lot of users :-(.
+    $courseusers = $DB->get_records(
+        'user', array('deleted' => 0),
+        'lastaccess DESC', 'id, ' . get_all_user_name_fields(true),
+        $limitfrom, $limitnum
+    );
 
     if ($courseusers) {
         foreach ($courseusers as $courseuser) {
             $users[$courseuser->id] = fullname($courseuser, has_capability('moodle/site:viewfullnames', $context));
         }
     }
-
-
 
     $courses = array();
     $sql = "SELECT DISTINCT id AS course, fullname AS coursename FROM {course} WHERE visible = 1 AND format != 'site'";
@@ -99,22 +121,13 @@ function block_attendance_tracker_report_log_print_selector_form($course_id = 0,
     asort($courses);
     asort($users);
 
-    // Prepare the list of action options.
-    $actions = array(
-        'view' => get_string('view'),
-        'add' => get_string('add'),
-        'update' => get_string('update'),
-        'delete' => get_string('delete'),
-        '-view' => get_string('allchanges')
-    );
-
     $datefrom = $datefrom ?: strtotime('-1 year');
 
     echo "<form class=\"logselectform\" action=\"$CFG->wwwroot/blocks/attendance_tracker/index.php\" method=\"get\">\n";
     echo "<div>\n";
 
     echo html_writer::label(get_string('selectacoursesite'), 'menuhost_course', false, array('class' => 'accesshide'));
-    echo "<sup style='color:red'>*</sup>".html_writer::select($courses, "course_id", $course_id);
+    echo "<sup style='color:red'>*</sup>".html_writer::select($courses, "course_id", $courseid);
 
     echo html_writer::label(get_string('participantslist'), 'menuuser', false, array('class' => 'accesshide'));
     echo "<sup style='color:red'>*</sup>".html_writer::select($users, "user_id", $selecteduser);

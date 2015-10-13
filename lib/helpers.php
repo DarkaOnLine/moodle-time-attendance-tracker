@@ -25,19 +25,36 @@
 global $CFG;
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Helper class.
+ *
+ * Class attendance_tracker_helpers
+ */
 class attendance_tracker_helpers
 {
 
+    /**
+     * @var moodle_database
+     */
     protected $db;
 
-    public function __construct()
-    {
+    /**
+     * attendance_tracker_helpers constructor.
+     */
+    public function __construct() {
         global $DB;
         $this->db = $DB;
     }
 
-    public function get_module_by_cmid($cmid)
-    {
+    /**
+     * Get module by id.
+     *
+     * @param $cmid
+     * @return mixed
+     * @throws dml_missing_record_exception
+     * @throws dml_multiple_records_exception
+     */
+    public function get_module_by_cmid ($cmid) {
         $sql = "SELECT cm.*, md.name as modname
         FROM {course_modules} cm,
         {modules} md
@@ -50,24 +67,31 @@ class attendance_tracker_helpers
     }
 
 
-    public function get_quiz_id_by_attempt_id($quiz_attempt_id)
-    {
-        $row = $this->db->get_record('quiz_attempts',array('id' => $quiz_attempt_id));
+    /**
+     * Get quiz by id.
+     *
+     * @param $quizattemptid
+     * @return bool
+     */
+    public function get_quiz_id_by_attempt_id($quizattemptid) {
+        $row = $this->db->get_record('quiz_attempts', array('id' => $quizattemptid));
 
-        if($row)
+        if ($row) {
             return $row->quiz;
+        }
 
         return false;
     }
 
     /**
-     * Check that a given name is in a permittable format
+     * Check that a given name is in a permittable format.
      *
      * @param string $pageformat
+     * @param array $formats
      * @return bool
      */
     public function blocks_allowed_in_format($pageformat, $formats) {
-        $accept = NULL;
+        $accept = null;
         $maxdepth = -1;
         if (!$formats) {
             $formats = array();
@@ -80,24 +104,37 @@ class attendance_tracker_helpers
                 $accept = $allowed;
             }
         }
-        if ($accept === NULL) {
+        if ($accept === null) {
             $accept = !empty($formats['all']);
         }
         return $accept;
     }
 
-    public function calendar($start_date, $end_date = null)
-    {
+    /**
+     * Get callendar select.
+     *
+     * @param $startdate
+     * @param null $enddate
+     * @return helper_calendar
+     */
+    public function calendar($startdate, $enddate = null) {
         $calendar = new helper_calendar();
-        $calendar->set_data(array('datefrom' => $start_date));
+        $calendar->set_data(array('datefrom' => $startdate));
 
-        if($end_date)
-            $calendar->set_data(array('dateto' => $end_date));
+        if ($enddate) {
+            $calendar->set_data(array('dateto' => $enddate));
+        }
 
         return $calendar;
     }
 
-
+    /**
+     * Second to string converter.
+     *
+     * @param $seconds
+     * @return string
+     * @throws coding_exception
+     */
     public function seconds_to_string($seconds) {
         $conmin = 60;
         $conhour = $conmin * 60;
@@ -125,26 +162,32 @@ class attendance_tracker_helpers
     }
 }
 
-
+/**
+ * Class helper_calendar
+ */
 class helper_calendar extends moodleform {
 
-    function definition() {
+    /**
+     * @throws coding_exception
+     */
+    protected function definition() {
         $mform = & $this->_form;
         $mform->addElement('date_time_selector', 'datefrom', get_string('start', 'block_attendance_tracker'));
         $mform->addElement('date_time_selector', 'dateto', get_string('end', 'block_attendance_tracker'));
 
-        // Buttons
         $this->add_action_buttons(false, get_string('calculate', 'block_attendance_tracker'));
     }
-
 }
 
-function dump(){
-    $arg_list = func_get_args();
+/**
+ * Dumper for debuging.
+ */
+function dump() {
+    $arguments = func_get_args();
     $numargs = func_num_args();
     for ($i = 0; $i < $numargs; $i++) {
         echo '<pre>';
-        var_dump($arg_list[$i]);
+        var_dump($arguments[$i]);
         echo '</pre>';
     }
 }

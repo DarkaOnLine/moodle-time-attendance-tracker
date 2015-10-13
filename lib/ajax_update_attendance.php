@@ -26,63 +26,59 @@ require_once('../../../config.php');
 require_once('../lib/helpers.php');
 global $DB, $CFG, $USER, $COURSE;
 
-$table_name = 'block_attendance_tracker';
-//$CFG->debug = -1;
-//$CFG->debugdisplay = 1;
-//$DB->set_debug(true);
+$tablename = 'block_attendance_tracker';
+
 if (isloggedin()) {
 
-    $time_in_seconds = required_param('time',PARAM_INT);
-    $user_id = required_param('user_id',PARAM_INT);
-    $course_id = required_param('course_id',PARAM_INT);
-    $lesson_id = required_param('lesson_id',PARAM_INT);
-    $quiz_id = required_param('quiz_id',PARAM_INT);
-    $key = required_param('key',PARAM_TEXT);
+    $timeinseconds = required_param('time', PARAM_INT);
+    $userid = required_param('user_id', PARAM_INT);
+    $courseid = required_param('course_id', PARAM_INT);
+    $lessonid = required_param('lesson_id', PARAM_INT);
+    $quizid = required_param('quiz_id', PARAM_INT);
+    $key = required_param('key', PARAM_TEXT);
 
-    if($user_id && $course_id && ($lesson_id || $quiz_id) && $key && $key == $USER->sesskey){
+    if ($userid && $courseid && ($lessonid || $quizid) && $key && $key == $USER->sesskey) {
 
-        $search_where = array(
-            'user_id' => $user_id,
-            'course_id' => $course_id,
+        $searchwhere = array(
+            'user_id' => $userid,
+            'course_id' => $courseid,
             'date_from' => date('Y-m-d 00:00:00'),
             'date_to' => date('Y-m-d 23:59:59')
         );
-        $lesson_id_sql = $quiz_id_sql = 'IS NULL';
+        $lessonidsql = $quizidsql = 'IS NULL';
 
-        if($lesson_id){
-            $lesson_id_sql = " = ".$lesson_id;
-        }elseif($quiz_id){
-            $quiz_id_sql = " = ".$quiz_id;
+        if ($lessonid) {
+            $lessonidsql = " = ".$lessonid;
+        } else if ($quizid) {
+            $quizidsql = " = ".$quizid;
         }
 
         $record = $DB->get_record_select(
-            $table_name,
+            $tablename,
             "user_id = :user_id AND
              course_id = :course_id AND
-             lesson_id $lesson_id_sql AND
-             quiz_id $quiz_id_sql AND
+             lesson_id $lessonidsql AND
+             quiz_id $quizidsql AND
              date >= :date_from AND
              date <= :date_to",
-            $search_where
+            $searchwhere
         );
 
-        if($record){
-            $data_to_update = new stdClass;
-            $data_to_update->id = $record->id;
-            $data_to_update->time_in_seconds = $record->time_in_seconds + $time_in_seconds;
-            $DB->update_record($table_name, $data_to_update, true);
-        }else{
+        if ($record) {
+            $datatoupdate = new stdClass;
+            $datatoupdate->id = $record->id;
+            $datatoupdate->time_in_seconds = $record->time_in_seconds + $timeinseconds;
+            $DB->update_record($tablename, $datatoupdate, true);
+        } else {
             $data = new stdClass;
-            $data->user_id = $user_id;
-            $data->course_id = $course_id;
-            $data->lesson_id = $lesson_id ?: null;
-            $data->quiz_id = $quiz_id ?: null;
+            $data->user_id = $userid;
+            $data->course_id = $courseid;
+            $data->lesson_id = $lessonid ?: null;
+            $data->quiz_id = $quizid ?: null;
             $data->date = date('Y-m-d H:i:s');
-            $data->time_in_seconds = $time_in_seconds;
-            $DB->insert_record($table_name, $data);
+            $data->time_in_seconds = $timeinseconds;
+            $DB->insert_record($tablename, $data);
         }
-
         echo 'OK';
     }
-
 }

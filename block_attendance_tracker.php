@@ -22,8 +22,11 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once 'lib/helpers.php';
+require_once ('lib/helpers.php');
 
+/**
+ * Class block_attendance_tracker
+ */
 class block_attendance_tracker extends block_base {
 
     /**
@@ -31,60 +34,77 @@ class block_attendance_tracker extends block_base {
      */
     protected $helper;
 
-    public $available_modules_for_tracking = array(
+    /**
+     * @var array
+     */
+    public $availablemodulesfortracking = array(
         'lesson', 'quiz'
     );
 
+    /**
+     * Init plugin
+     * @throws coding_exception
+     */
     function init() {
+
         $this->title = get_string('blocktitle', 'block_attendance_tracker');
         $this->helper = new attendance_tracker_helpers();
     }
 
+    /**
+     * Inject tracker JS script
+     * @throws coding_exception
+     */
     function inject_tracker(){
-        global $CFG, $USER, $COURSE, $ATTENDANCE_TRACKER_SCRIPT_ENABLED, $PAGE;
+        global $CFG, $USER, $COURSE, $PAGE, $attendancetrackerscriptenebled;
 
-        $page_type = $PAGE->pagetype;
+        $pagetype = $PAGE->pagetype;
 
-        if(!$ATTENDANCE_TRACKER_SCRIPT_ENABLED && $this->helper->blocks_allowed_in_format($page_type, $this->applicable_formats()) && isloggedin()) {
+        if(!$attendancetrackerscriptenebled &&
+            $this->helper->blocks_allowed_in_format($pagetype, $this->applicable_formats()) && isloggedin()) {
 
             $cmid = optional_param('id',0, PARAM_INT);
             if($cmid) {
                 $module = $this->helper->get_module_by_cmid($cmid);
             }
 
-            $quiz_attempt_id = optional_param('attempt',0, PARAM_INT);
-            $quiz_id = null;
-            if($quiz_attempt_id){
-                $quiz_id = $this->helper->get_quiz_id_by_attempt_id($quiz_attempt_id);
+            $quizattemptid = optional_param('attempt',0, PARAM_INT);
+            $quizid = null;
+            if($quizattemptid){
+                $quizid = $this->helper->get_quiz_id_by_attempt_id($quizattemptid);
             }
 
-            if( ($module && in_array($module->modname,$this->available_modules_for_tracking) || $quiz_id ) ) {
-                $isPopup = (strpos($_SERVER['SCRIPT_NAME'], 'mod/chat/gui_header_js/') > 0) ? true : false;
-                $attendance_tracker_update_url = $CFG->wwwroot . '/blocks/attendance_tracker/lib/ajax_update_attendance.php';
+            if( ($module && in_array($module->modname,$this->availablemodulesfortracking) || $quizid ) ) {
+                $ispopup = (strpos($_SERVER['SCRIPT_NAME'], 'mod/chat/gui_header_js/') > 0) ? true : false;
+                $attendancetrackerupdateurl = $CFG->wwwroot . '/blocks/attendance_tracker/lib/ajax_update_attendance.php';
 
-                $js_params = array(
+                $jsparams = array(
                     'user_id' => $USER->id,
                     'course_id' => $COURSE->id,
-                    'is_popup' => $isPopup,
-                    'url' => $attendance_tracker_update_url,
+                    'is_popup' => $ispopup,
+                    'url' => $attendancetrackerupdateurl,
                     'lesson_id' => null,
                     'quiz_id' => null,
                     'key' => $USER->sesskey,
                 );
 
                 if($module && $module->modname == 'lesson'){
-                    $js_params['lesson_id'] = $module->instance;
-                }elseif($quiz_id){
-                    $js_params['quiz_id'] = $quiz_id;
+                    $jsparams['lesson_id'] = $module->instance;
+                }elseif($quizid){
+                    $jsparams['quiz_id'] = $quizid;
                 }
 
-                $this->page->requires->js_call_amd('block_attendance_tracker/tracker', 'initialise', $js_params);
+                $this->page->requires->js_call_amd('block_attendance_tracker/tracker', 'initialise', $jsparams);
 
-                $ATTENDANCE_TRACKER_SCRIPT_ENABLED = true;
+                $attendancetrackerscriptenebled = true;
             }
         }
     }
 
+    /**
+     * @return stdClass
+     * @throws coding_exception
+     */
     function get_content() {
         global $CFG;
 
@@ -99,7 +119,9 @@ class block_attendance_tracker extends block_base {
             <div id="settingsnav" class="box block_tree_box">
                 <ul class="block_tree list">
                     <li class="type_setting">
-                        <p class="tree_item leaf"><a href="'.$url.'">'.get_string('link', 'block_attendance_tracker').'</a></p>
+                        <p class="tree_item leaf">
+                            <a href="'.$url.'">'.get_string('link', 'block_attendance_tracker').'</a>
+                        </p>
                     </li>
                 </ul>
             </div>
@@ -111,6 +133,9 @@ class block_attendance_tracker extends block_base {
     }
 
 
+    /**
+     * @return array
+     */
     function applicable_formats() {
         return array(
             'site-index' => true,
@@ -121,8 +146,10 @@ class block_attendance_tracker extends block_base {
         );
     }
 
+    /**
+     * @return bool
+     */
     function instance_allow_multiple() {
         return false;
     }
-
 }
