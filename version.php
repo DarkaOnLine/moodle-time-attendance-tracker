@@ -26,4 +26,5 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version = 2015101300;
 $plugin->requires = 2015050500;
 $plugin->component = 'block_attendance_tracker';
-$plugin->release = '1.0';
+$plugin->release = '1.1';
+$plugin->maturity = MATURITY_RC;
