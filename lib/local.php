@@ -76,7 +76,6 @@ function block_attendance_tracker_print_log($courseid, $userid, $datefrom, $date
  * @param int $selecteduser
  * @param null $datefrom
  * @param null $dateto
- * @param string $logformat
  * @throws coding_exception
  * @throws dml_exception
  */
@@ -85,7 +84,7 @@ function block_attendance_tracker_report_log_print_selector_form(
 
     global $CFG, $DB;
 
-    $helper = new attendance_tracker_helpers();
+    $helper = new block_attendance_tracker_helpers();
 
     $context = $sitecontext = context_system::instance();
 

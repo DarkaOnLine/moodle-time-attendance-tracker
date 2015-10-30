@@ -30,7 +30,7 @@ require_once('lib/helpers.php');
 class block_attendance_tracker extends block_base {
 
     /**
-     * @var attendance_tracker_helpers
+     * @var block_attendance_tracker_helpers
      */
     protected $helper;
 
@@ -46,9 +46,8 @@ class block_attendance_tracker extends block_base {
      * @throws coding_exception
      */
     public function init() {
-
         $this->title = get_string('blocktitle', 'block_attendance_tracker');
-        $this->helper = new attendance_tracker_helpers();
+        $this->helper = new block_attendance_tracker_helpers();
     }
 
     /**

@@ -24,7 +24,6 @@
 define('AJAX_SCRIPT', true);
 
 require_once('../../../config.php');
-require_once('../lib/helpers.php');
 global $DB, $CFG, $USER, $COURSE;
 
 $tablename = 'block_attendance_tracker';
@@ -81,6 +80,7 @@ if (isloggedin()) {
             $DB->insert_record($tablename, $data);
         }
         echo "{'success': true}";
+    } else {
+        echo "{'success': false}";
     }
-    echo "{'success': false}";
 }

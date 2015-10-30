@@ -30,7 +30,7 @@ require_once($CFG->libdir . '/formslib.php');
  *
  * Class attendance_tracker_helpers
  */
-class attendance_tracker_helpers
+class block_attendance_tracker_helpers
 {
 
     /**
