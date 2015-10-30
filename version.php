@@ -23,7 +23,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /** @var stdClass $plugin */
-$plugin->version = 2015101300;
+$plugin->version = 2015103000;
 $plugin->requires = 2015050500;
 $plugin->component = 'block_attendance_tracker';
 $plugin->release = '1.1';
