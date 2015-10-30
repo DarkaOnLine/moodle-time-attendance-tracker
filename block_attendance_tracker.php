@@ -22,7 +22,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once ('lib/helpers.php');
+require_once('lib/helpers.php');
 
 /**
  * Class block_attendance_tracker
@@ -45,7 +45,7 @@ class block_attendance_tracker extends block_base {
      * Init plugin
      * @throws coding_exception
      */
-    function init() {
+    public function init() {
 
         $this->title = get_string('blocktitle', 'block_attendance_tracker');
         $this->helper = new attendance_tracker_helpers();
@@ -55,26 +55,27 @@ class block_attendance_tracker extends block_base {
      * Inject tracker JS script
      * @throws coding_exception
      */
-    function inject_tracker(){
+    public function inject_tracker() {
         global $CFG, $USER, $COURSE, $PAGE, $attendancetrackerscriptenebled;
 
         $pagetype = $PAGE->pagetype;
 
-        if(!$attendancetrackerscriptenebled &&
+        if (!$attendancetrackerscriptenebled &&
             $this->helper->blocks_allowed_in_format($pagetype, $this->applicable_formats()) && isloggedin()) {
 
-            $cmid = optional_param('id',0, PARAM_INT);
-            if($cmid) {
+            $cmid = optional_param('id', 0, PARAM_INT);
+            $module = null;
+            if ($cmid) {
                 $module = $this->helper->get_module_by_cmid($cmid);
             }
 
-            $quizattemptid = optional_param('attempt',0, PARAM_INT);
+            $quizattemptid = optional_param('attempt', 0, PARAM_INT);
             $quizid = null;
-            if($quizattemptid){
+            if ($quizattemptid) {
                 $quizid = $this->helper->get_quiz_id_by_attempt_id($quizattemptid);
             }
 
-            if( ($module && in_array($module->modname,$this->availablemodulesfortracking) || $quizid ) ) {
+            if ( ($module && in_array($module->modname, $this->availablemodulesfortracking) || $quizid ) ) {
                 $ispopup = (strpos($_SERVER['SCRIPT_NAME'], 'mod/chat/gui_header_js/') > 0) ? true : false;
                 $attendancetrackerupdateurl = $CFG->wwwroot . '/blocks/attendance_tracker/lib/ajax_update_attendance.php';
 
@@ -88,9 +89,9 @@ class block_attendance_tracker extends block_base {
                     'key' => $USER->sesskey,
                 );
 
-                if($module && $module->modname == 'lesson'){
+                if ($module && $module->modname == 'lesson') {
                     $jsparams['lesson_id'] = $module->instance;
-                }elseif($quizid){
+                } else if ($quizid) {
                     $jsparams['quiz_id'] = $quizid;
                 }
 
@@ -105,7 +106,7 @@ class block_attendance_tracker extends block_base {
      * @return stdClass
      * @throws coding_exception
      */
-    function get_content() {
+    public function get_content() {
         global $CFG;
 
         $this->inject_tracker();
@@ -136,7 +137,7 @@ class block_attendance_tracker extends block_base {
     /**
      * @return array
      */
-    function applicable_formats() {
+    public function applicable_formats() {
         return array(
             'site-index' => true,
             'course' => false,
@@ -149,7 +150,7 @@ class block_attendance_tracker extends block_base {
     /**
      * @return bool
      */
-    function instance_allow_multiple() {
+    public function instance_allow_multiple() {
         return false;
     }
 }
