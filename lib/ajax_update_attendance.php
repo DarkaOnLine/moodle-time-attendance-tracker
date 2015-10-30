@@ -21,6 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('AJAX_SCRIPT', true);
 
 require_once('../../../config.php');
 require_once('../lib/helpers.php');
@@ -79,6 +80,7 @@ if (isloggedin()) {
             $data->time_in_seconds = $timeinseconds;
             $DB->insert_record($tablename, $data);
         }
-        echo 'OK';
+        echo "{'success': true}";
     }
+    echo "{'success': false}";
 }
