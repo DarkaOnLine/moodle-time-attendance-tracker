@@ -45,24 +45,19 @@ define(['jquery'], function($) {
 
         addListeners : function(){
             var $this = this;
-            if(window.addEventListener){ //DOM browsers (Firefox,Opera,Chrome)
-                window.addEventListener('focus', function(){$this.setWindowActive();}, false);
-                window.addEventListener('blur', function(){$this.setWindowInactive();}, false);
-                if(!$this.cfg.is_popup) {
-                    window.addEventListener('unload', function(){$this.addTime();}, false);
-                }
-            }else if(window.attachEvent){ //IE
-                document.attachEvent('onfocusin', function(){$this.setWindowActive();});
-                document.attachEvent('onfocusout', function(){$this.setWindowInactive();});
-                if(!$this.cfg.is_popup) {
-                    window.attachEvent('onunload', function(){$this.addTime();});
-                }
-            }else{ //other browsers
-                window.onfocus = function(){$this.setWindowActive();};
-                window.onblur = function(){$this.setWindowInactive();};
-                if(!$this.cfg.is_popup) {
-                    window.onunload = function(){$this.addTime();};
-                }
+
+            $(window).focus(function() {
+                $this.setWindowActive();
+            });
+
+            $(window).blur(function() {
+                $this.setWindowInactive();
+            });
+
+            if(!$this.cfg.is_popup) {
+                $(window).on('beforeunload', function(){
+                    $this.addTime();
+                });
             }
         },
 
